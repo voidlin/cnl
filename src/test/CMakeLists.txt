@@ -266,3 +266,20 @@ if(${STD} STREQUAL "17" AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU AND CMAKE_CXX_
     ExternalProject_Get_Property(Vc source_dir)
     target_include_directories("${target}" PRIVATE SYSTEM "${source_dir}")
 endif()
+
+# create test of wide_integer integration
+# http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0539r3.html
+
+make_test(wide_integer.cpp target "")
+
+ExternalProject_Add(
+        wide_integer
+        URL "https://github.com/cerevra/int/archive/19fe61ea3b442b807f1bccda364d8f659b0aba72.zip"
+        URL_MD5 "bb17b0658e4eb80e8ce9c92333d834dd"
+        CONFIGURE_COMMAND ""
+        UPDATE_COMMAND ""
+        INSTALL_COMMAND ""
+        CMAKE_COMMAND ""
+)
+ExternalProject_Get_Property(wide_integer source_dir)
+target_include_directories(test-wide_integer SYSTEM PRIVATE "${source_dir}")
