@@ -54,7 +54,7 @@ namespace cnl {
         template<class Result>
         constexpr Result return_if(trapping_overflow_tag, bool condition, Result const& value, char const* message)
         {
-            return condition ? value : terminate<Result>(message);
+            return CNL_LIKELY(condition) ? value : terminate<Result>(message);
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ namespace cnl {
         template<class Result>
         constexpr Result return_if(throwing_overflow_tag, bool condition, Result const& value, char const* message)
         {
-            return condition ? value : throw std::overflow_error(message);
+            return CNL_LIKELY(condition) ? value : throw std::overflow_error(message);
         }
 #else
         template<class Result>
@@ -181,9 +181,9 @@ namespace cnl {
             {
                 using test = convert_test<Result, Input>;
                 using numeric_limits = numeric_limits<Result>;
-                return test::positive(rhs)
+                return CNL_UNLIKELY(test::positive(rhs))
                        ? numeric_limits::max()
-                       : test::negative(rhs)
+                       : CNL_UNLIKELY(test::negative(rhs))
                          ? numeric_limits::lowest()
                          : static_cast<Result>(rhs);
             }
@@ -310,10 +310,10 @@ namespace cnl {
                 using overflow_test = overflow_test<Operator, Lhs, Rhs>;
                 return return_if(
                         OverflowTag{},
-                        !overflow_test::positive(lhs, rhs),
+                        !CNL_UNLIKELY(overflow_test::positive(lhs, rhs)),
                         return_if(
                                 OverflowTag{},
-                                !overflow_test::negative(lhs, rhs),
+                                !CNL_UNLIKELY(overflow_test::negative(lhs, rhs)),
                                 tagged_binary_operator<native_tag, Operator>{}(lhs, rhs),
                                 "negative overflow"),
                         "positive overflow");
@@ -328,9 +328,9 @@ namespace cnl {
             {
                 using overflow_test = overflow_test<Operator, Lhs, Rhs>;
                 using result_type = typename overflow_test::result;
-                return overflow_test::positive(lhs, rhs)
+                return CNL_UNLIKELY(overflow_test::positive(lhs, rhs))
                        ? numeric_limits<result_type>::max()
-                       : overflow_test::negative(lhs, rhs)
+                       : CNL_UNLIKELY(overflow_test::negative(lhs, rhs))
                          ? numeric_limits<result_type>::lowest()
                          : tagged_binary_operator<native_tag, Operator>{}(lhs, rhs);
             }
