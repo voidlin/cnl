@@ -14,12 +14,22 @@
 
 namespace cnl {
     namespace _impl {
+#if defined(CNL_DEBUG)
         template<class Result>
         [[noreturn]] CNL_RELAXED_CONSTEXPR Result terminate(char const* message) noexcept
         {
-            std::fprintf(stderr, "%s\n", message);
+            std::fputs(message, stderr);
             std::terminate();
         }
+#endif
+
+#if defined(CNL_RELEASE)
+        template<class Result>
+        [[noreturn]] CNL_RELAXED_CONSTEXPR Result terminate(char const*) noexcept
+        {
+            std::terminate();
+        }
+#endif
     }
 }
 
